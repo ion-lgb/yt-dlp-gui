@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -47,28 +48,22 @@ jobs:
         run: choco install ffmpeg -y
 
       - name: Install Python dependencies
-        run: |
-          pip install pywebview yt-dlp pyinstaller
-
-      - name: Find ffmpeg path
-        id: ffmpeg
-        shell: bash
-        run: |
-          echo "ffmpeg=$(which ffmpeg)" >> $GITHUB_OUTPUT
-          echo "ffprobe=$(which ffprobe)" >> $GITHUB_OUTPUT
+        run: pip install pywebview yt-dlp pyinstaller
 
       # ── macOS Build ──
       - name: Build (macOS)
         if: runner.os == 'macOS'
         run: |
+          FFMPEG=$(which ffmpeg)
+          FFPROBE=$(which ffprobe)
           pyinstaller \
             --name "yt-dlp-gui" \
             --windowed \
             --noconfirm \
             --clean \
             --add-data "gui/static:static" \
-            --add-binary "${{ steps.ffmpeg.outputs.ffmpeg }}:." \
-            --add-binary "${{ steps.ffmpeg.outputs.ffprobe }}:." \
+            --add-binary "$FFMPEG:." \
+            --add-binary "$FFPROBE:." \
             --hidden-import webview \
             --hidden-import webview.platforms.cocoa \
             --hidden-import yt_dlp \
@@ -79,7 +74,11 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           mkdir -p dmg_staging
-          cp -R "dist/yt-dlp-gui.app" dmg_staging/ || cp -R dist/yt-dlp-gui dmg_staging/
+          if [ -d "dist/yt-dlp-gui.app" ]; then
+            cp -R "dist/yt-dlp-gui.app" dmg_staging/
+          else
+            cp -R dist/yt-dlp-gui dmg_staging/
+          fi
           ln -sf /Applications dmg_staging/Applications
           hdiutil create -volname "yt-dlp GUI" -srcfolder dmg_staging -ov -format UDZO "dist/${{ matrix.artifact }}.${{ matrix.ext }}"
 
@@ -87,14 +86,16 @@ jobs:
       - name: Build (Linux)
         if: runner.os == 'Linux'
         run: |
+          FFMPEG=$(which ffmpeg)
+          FFPROBE=$(which ffprobe)
           pyinstaller \
             --name "yt-dlp-gui" \
             --onedir \
             --noconfirm \
             --clean \
             --add-data "gui/static:static" \
-            --add-binary "${{ steps.ffmpeg.outputs.ffmpeg }}:." \
-            --add-binary "${{ steps.ffmpeg.outputs.ffprobe }}:." \
+            --add-binary "$FFMPEG:." \
+            --add-binary "$FFPROBE:." \
             --hidden-import webview \
             --hidden-import yt_dlp \
             --exclude-module tkinter \
@@ -102,35 +103,35 @@ jobs:
 
       - name: Package tar.gz (Linux)
         if: runner.os == 'Linux'
-        run: |
-          cd dist && tar -czf "${{ matrix.artifact }}.${{ matrix.ext }}" yt-dlp-gui/
+        run: cd dist && tar -czf "${{ matrix.artifact }}.${{ matrix.ext }}" yt-dlp-gui/
 
       # ── Windows Build ──
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        shell: bash
+        shell: pwsh
         run: |
-          pyinstaller \
-            --name "yt-dlp-gui" \
-            --windowed \
-            --onedir \
-            --noconfirm \
-            --clean \
-            --add-data "gui/static;static" \
-            --add-binary "$(which ffmpeg);." \
-            --add-binary "$(which ffprobe);." \
-            --hidden-import webview \
-            --hidden-import webview.platforms.mshtml \
-            --hidden-import webview.platforms.edgechromium \
-            --hidden-import yt_dlp \
-            --exclude-module tkinter \
+          $ffmpeg = (Get-Command ffmpeg).Source
+          $ffprobe = (Get-Command ffprobe).Source
+          pyinstaller `
+            --name "yt-dlp-gui" `
+            --windowed `
+            --onedir `
+            --noconfirm `
+            --clean `
+            --add-data "gui/static;static" `
+            --add-binary "$ffmpeg;." `
+            --add-binary "$ffprobe;." `
+            --hidden-import webview `
+            --hidden-import webview.platforms.mshtml `
+            --hidden-import webview.platforms.edgechromium `
+            --hidden-import yt_dlp `
+            --exclude-module tkinter `
             gui/app.py
 
       - name: Package zip (Windows)
         if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          cd dist && 7z a -tzip "${{ matrix.artifact }}.${{ matrix.ext }}" yt-dlp-gui/
+        shell: pwsh
+        run: Compress-Archive -Path "dist/yt-dlp-gui" -DestinationPath "dist/${{ matrix.artifact }}.${{ matrix.ext }}"
 
       # ── Upload ──
       - name: Upload artifact
