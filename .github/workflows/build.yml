@@ -41,13 +41,20 @@ jobs:
 
       - name: Install ffmpeg (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libgirepository1.0-dev gir1.2-webkit2-4.1 libwebkit2gtk-4.1-dev
 
       - name: Install ffmpeg (Windows)
         if: runner.os == 'Windows'
         run: choco install ffmpeg -y
 
-      - name: Install Python dependencies
+      - name: Install Python dependencies (macOS/Linux)
+        if: runner.os != 'Windows'
+        run: pip install pywebview yt-dlp pyinstaller
+
+      - name: Install Python dependencies (Windows)
+        if: runner.os == 'Windows'
         run: pip install pywebview yt-dlp pyinstaller
 
       # ── macOS Build ──
@@ -108,30 +115,16 @@ jobs:
       # ── Windows Build ──
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
+        shell: cmd
         run: |
-          $ffmpeg = (Get-Command ffmpeg).Source
-          $ffprobe = (Get-Command ffprobe).Source
-          pyinstaller `
-            --name "yt-dlp-gui" `
-            --windowed `
-            --onedir `
-            --noconfirm `
-            --clean `
-            --add-data "gui/static;static" `
-            --add-binary "$ffmpeg;." `
-            --add-binary "$ffprobe;." `
-            --hidden-import webview `
-            --hidden-import webview.platforms.mshtml `
-            --hidden-import webview.platforms.edgechromium `
-            --hidden-import yt_dlp `
-            --exclude-module tkinter `
-            gui/app.py
+          for /f "delims=" %%i in ('where ffmpeg') do set FFMPEG=%%i
+          for /f "delims=" %%i in ('where ffprobe') do set FFPROBE=%%i
+          pyinstaller --name "yt-dlp-gui" --windowed --onedir --noconfirm --clean --add-data "gui\static;static" --add-binary "%FFMPEG%;." --add-binary "%FFPROBE%;." --hidden-import webview --hidden-import webview.platforms.mshtml --hidden-import webview.platforms.edgechromium --hidden-import yt_dlp --exclude-module tkinter gui\app.py
 
       - name: Package zip (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path "dist/yt-dlp-gui" -DestinationPath "dist/${{ matrix.artifact }}.${{ matrix.ext }}"
+        run: Compress-Archive -Path "dist\yt-dlp-gui" -DestinationPath "dist\${{ matrix.artifact }}.${{ matrix.ext }}"
 
       # ── Upload ──
       - name: Upload artifact
