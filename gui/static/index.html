@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yt-dlp GUI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="navbar">
+        <div class="navbar-brand">
+            <div class="logo-mark">
+                <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="url(#logo-grad)"/>
+                    <path d="M12 9v14l11-7-11-7z" fill="#fff"/>
+                    <defs><linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#E11D48"/><stop offset="1" stop-color="#BE123C"/></linearGradient></defs>
+                </svg>
+            </div>
+            <span class="brand-text">yt-dlp <span class="brand-accent">GUI</span></span>
+        </div>
+        <div class="navbar-actions">
+            <div class="chip" id="version-chip">
+                <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <span>loading...</span>
+            </div>
+            <!-- 主题切换 -->
+            <button class="btn-icon" id="theme-btn" aria-label="切换主题">
+                <svg id="theme-icon-dark" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+                <svg id="theme-icon-light" viewBox="0 0 24 24" width="20" height="20" style="display:none"><path fill="currentColor" d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/></svg>
+            </button>
+            <!-- 语言切换 -->
+            <button class="btn-icon" id="lang-btn" aria-label="语言">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+            </button>
+            <!-- 历史记录 -->
+            <button class="btn-icon" id="history-btn" aria-label="历史记录">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            </button>
+            <button class="btn-icon" id="settings-btn" aria-label="设置">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="main" id="main-drop-zone">
+        <!-- 拖拽覆盖层 -->
+        <div class="drop-overlay hidden" id="drop-overlay">
+            <svg viewBox="0 0 24 24" width="48" height="48"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <p data-i18n="drop_hint">拖拽链接到此处</p>
+        </div>
+
+        <!-- URL 输入 -->
+        <section class="section-input">
+            <div class="input-row">
+                <div class="input-field">
+                    <svg class="input-field-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+                    <input type="text" id="url-input" data-i18n-placeholder="url_placeholder" placeholder="粘贴视频或播放列表链接（支持多行批量）..." autocomplete="off" spellcheck="false">
+                    <button class="btn-icon btn-icon-inside" id="paste-btn" aria-label="粘贴">
+                        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 18H5V4h2v3h10V4h2v16z"/></svg>
+                    </button>
+                </div>
+                <button class="btn-primary" id="fetch-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <span data-i18n="fetch">获取信息</span>
+                </button>
+            </div>
+            <div id="fetch-status" class="status-bar hidden"></div>
+        </section>
+
+        <!-- 视频信息卡片 -->
+        <section id="video-info" class="section-video hidden">
+            <div class="card card-video">
+                <div class="card-thumb" id="thumb-wrap">
+                    <img id="video-thumb" src="" alt="">
+                    <div class="thumb-badge" id="video-duration"></div>
+                    <!-- 视频预览：hover 显示 -->
+                    <div class="thumb-preview" id="thumb-preview">
+                        <svg viewBox="0 0 24 24" width="40" height="40"><path fill="rgba(255,255,255,0.9)" d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h2 class="card-title" id="video-title"></h2>
+                    <p class="card-subtitle" id="video-uploader"></p>
+                    <p class="card-desc" id="video-desc"></p>
+                    <div class="card-actions">
+                        <div class="form-group">
+                            <label class="form-label" for="format-select" data-i18n="format">格式</label>
+                            <div class="select-wrap">
+                                <select id="format-select"></select>
+                                <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                        </div>
+                        <div class="form-group" id="subtitle-group" style="display:none">
+                            <label class="form-label" data-i18n="subtitle">字幕</label>
+                            <div class="select-wrap">
+                                <select id="subtitle-select"><option value="">不下载字幕</option></select>
+                                <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <label class="checkbox-label" id="embed-sub-label" style="display:none">
+                                <input type="checkbox" id="embed-sub-check">
+                                <span data-i18n="embed_sub">嵌入字幕到视频</span>
+                            </label>
+                        </div>
+                        <button class="btn-cta" id="download-btn">
+                            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                            <span data-i18n="download">开始下载</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 播放列表 -->
+        <section id="playlist-info" class="section-playlist hidden">
+            <div class="card card-playlist">
+                <div class="card-playlist-header">
+                    <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zm-7-1l5-4-5-4v8z"/></svg>
+                    <h2 id="playlist-title"></h2>
+                    <div class="chip chip-sm" id="playlist-count"></div>
+                </div>
+                <div class="card-actions" style="padding:0 0 16px">
+                    <div class="form-group">
+                        <label class="form-label" for="playlist-format-select" data-i18n="format">格式</label>
+                        <div class="select-wrap">
+                            <select id="playlist-format-select">
+                                <option value="best">最佳画质 (MP4)</option>
+                                <option value="audio">仅音频 (MP3)</option>
+                            </select>
+                            <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+                    </div>
+                    <button class="btn-cta" id="playlist-download-btn">
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        <span data-i18n="download_all">全部下载</span>
+                    </button>
+                </div>
+                <div class="playlist-list" id="playlist-entries"></div>
+            </div>
+        </section>
+
+        <!-- 下载队列 -->
+        <section class="section-tasks">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+                    <span data-i18n="queue">下载队列</span>
+                </h3>
+                <button class="btn-ghost" id="open-dir-btn">
+                    <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                    <span data-i18n="open_dir">打开目录</span>
+                </button>
+            </div>
+            <div id="tasks-list" class="tasks-container">
+                <div class="empty-placeholder" id="empty-state">
+                    <svg viewBox="0 0 24 24" width="40" height="40"><path fill="currentColor" opacity="0.2" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <p data-i18n="no_tasks">暂无下载任务</p>
+                    <p class="text-muted" data-i18n="no_tasks_hint">粘贴链接，即刻开始</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 设置抽屉 -->
+    <div class="drawer-overlay hidden" id="drawer-overlay"></div>
+    <aside class="drawer hidden" id="settings-panel">
+        <div class="drawer-header">
+            <h3 data-i18n="settings">设置</h3>
+            <button class="btn-icon" id="settings-close-btn" aria-label="关闭">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <div class="form-group">
+                <label class="form-label" data-i18n="download_dir">下载目录</label>
+                <div class="path-row">
+                    <div class="path-value" id="download-dir-display">~/Downloads</div>
+                    <button class="btn-outline btn-sm" id="choose-dir-btn" data-i18n="choose">选择</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="proxy">代理 (HTTP/SOCKS5)</label>
+                <input class="form-input" id="proxy-input" placeholder="http://127.0.0.1:7890" spellcheck="false">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="speed_limit">限速</label>
+                <input class="form-input" id="speed-limit-input" placeholder="不限速 (例: 5M, 500K)" spellcheck="false">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="cookie_browser">Cookie 来源浏览器</label>
+                <div class="select-wrap">
+                    <select id="cookie-browser-select">
+                        <option value="">不使用 Cookie</option>
+                        <option value="chrome">Chrome</option>
+                        <option value="firefox">Firefox</option>
+                        <option value="safari">Safari</option>
+                        <option value="edge">Edge</option>
+                        <option value="brave">Brave</option>
+                    </select>
+                    <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 历史记录抽屉 -->
+    <aside class="drawer hidden" id="history-panel">
+        <div class="drawer-header">
+            <h3 data-i18n="history">下载历史</h3>
+            <div style="display:flex;gap:6px">
+                <button class="btn-ghost" id="clear-history-btn" data-i18n="clear">清空</button>
+                <button class="btn-icon" id="history-close-btn" aria-label="关闭">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="drawer-body" id="history-list"></div>
+    </aside>
+
+    <script src="app.js"></script>
+</body>
+</html>
