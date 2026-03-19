@@ -112,14 +112,22 @@ jobs:
         if: runner.os == 'Linux'
         run: cd dist && tar -czf "${{ matrix.artifact }}.${{ matrix.ext }}" yt-dlp-gui/
 
-      # ── Windows Build ──
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: pwsh
         run: |
-          for /f "delims=" %%i in ('where ffmpeg') do set FFMPEG=%%i
-          for /f "delims=" %%i in ('where ffprobe') do set FFPROBE=%%i
-          pyinstaller --name "yt-dlp-gui" --windowed --onedir --noconfirm --clean --add-data "gui\static;static" --add-binary "%FFMPEG%;." --add-binary "%FFPROBE%;." --hidden-import webview --hidden-import webview.platforms.mshtml --hidden-import webview.platforms.edgechromium --hidden-import yt_dlp --exclude-module tkinter gui\app.py
+          Copy-Item (Get-Command ffmpeg).Source -Destination .\ffmpeg.exe
+          Copy-Item (Get-Command ffprobe).Source -Destination .\ffprobe.exe
+          pyinstaller --name "yt-dlp-gui" --windowed --onedir --noconfirm --clean `
+            --add-data "gui\static;static" `
+            --add-binary "ffmpeg.exe;." `
+            --add-binary "ffprobe.exe;." `
+            --hidden-import webview `
+            --hidden-import webview.platforms.mshtml `
+            --hidden-import webview.platforms.edgechromium `
+            --hidden-import yt_dlp `
+            --exclude-module tkinter `
+            gui\app.py
 
       - name: Package zip (Windows)
         if: runner.os == 'Windows'
